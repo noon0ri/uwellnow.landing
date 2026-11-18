@@ -12,10 +12,10 @@ const space = (id: SpaceId, name: string, w: number, h: number, [x0, y0, x1, y1]
 })
 
 export const SPACES: Space[] = [
-  space('fitness', '피트니스', 3356, 1874, [676, 262, 854, 686]),
-  space('office', '오피스', 2752, 1536, [1058, 248, 1280, 790]),
-  space('apartment', '아파트 커뮤니티', 2752, 1536, [1135, 228, 1375, 768]),
-  space('spa', '스파 & 사우나', 3990, 2226, [1033, 208, 1265, 722]),
+  space('fitness', '피트니스', 2400, 1340, [676, 262, 854, 686]),
+  space('office', '오피스', 2400, 1340, [1058, 248, 1280, 790]),
+  space('apartment', '아파트 커뮤니티', 2400, 1340, [1135, 228, 1375, 768]),
+  space('spa', '스파 & 사우나', 2400, 1339, [1033, 208, 1265, 722]),
   // Shot at an angle; the photo's device is slimmer than the model at any yaw, so x0 is nudged +30px to centre the overlap.
-  space('lounge', '라운지', 3636, 2028, [958, 225, 1140, 730], -0.75),
+  space('lounge', '라운지', 2400, 1339, [958, 225, 1140, 730], -0.75),
 ]

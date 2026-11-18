@@ -46,7 +46,7 @@ export function Spaces() {
           <div key={s.id} data-space-photo={i} className="absolute inset-0" style={{ opacity: i === 0 ? 1 : 0 }}>
             <picture>
               <source media="(max-width: 767px)" srcSet={s.srcMobile} />
-              <img src={s.src} alt={`${s.name}에 놓인 유웰나우`} loading={i === 0 ? 'eager' : 'lazy'} className="absolute inset-0 h-full w-full object-cover" />
+              <img src={s.src} alt={`${s.name}에 놓인 유웰나우`} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             </picture>
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent pb-10 pt-24 text-white">
               <div className="mx-auto max-w-7xl px-5 md:px-8">

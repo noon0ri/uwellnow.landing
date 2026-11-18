@@ -6,14 +6,16 @@ SITE=https://uwellnow.com
 html=$(curl -fsS "$SITE/")
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
-# For each base name, download every hashed webp variant and keep the widest (desktop) and the one closest to 1600px (mobile).
+# For each base name, download every hashed webp variant and keep the one closest to 2400px (desktop; larger ones
+# cause decode hitches while scrolling) and the one closest to 1600px (mobile).
 fetch() { # $1 base name, $2 output name, $3 want mobile (1/0)
   local best="" bestw=0 mob="" mobd=99999
   for path in $(grep -oE "/assets/$1-[A-Za-z0-9_-]+\.webp" <<<"$html" | sort -u); do
     local f="$tmp/$(basename "$path")"
     curl -fsS "$SITE$path" -o "$f"
     local w; w=$(sips -g pixelWidth "$f" | awk '/pixelWidth/{print $2}')
-    if (( w > bestw )); then bestw=$w; best=$f; fi
+    local bd=$(( bestw > 2400 ? bestw - 2400 : 2400 - bestw )) wd=$(( w > 2400 ? w - 2400 : 2400 - w ))
+    if [[ -z $best ]] || (( wd < bd )); then bestw=$w; best=$f; fi
     local d=$(( w > 1600 ? w - 1600 : 1600 - w ))
     if (( d < mobd )); then mobd=$d; mob=$f; fi
   done
