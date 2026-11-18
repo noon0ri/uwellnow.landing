@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Dispenser } from './Dispenser'
 import { rig } from './rig'
+import { useScrollRig } from './useScrollRig'
 
 const debug = new URLSearchParams(location.search).get('debug')
 const Debug = lazy(() => import('./Debug'))
@@ -37,6 +38,11 @@ function Ready({ onReady }: { onReady: () => void }) {
   return null
 }
 
+function ScrollRig() {
+  useScrollRig()
+  return null
+}
+
 export default function Stage({ fallback }: { fallback: ReactNode }) {
   const [ready, setReady] = useState(false)
   const mobile = innerWidth < 768
@@ -56,6 +62,7 @@ export default function Stage({ fallback }: { fallback: ReactNode }) {
           <Suspense fallback={null}>
             <Dispenser />
             <Ready onReady={() => setReady(true)} />
+            {!debug && <ScrollRig />}
             {debug && <Debug mode={debug} />}
           </Suspense>
         </Canvas>

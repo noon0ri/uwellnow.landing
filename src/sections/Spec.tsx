@@ -7,7 +7,7 @@ const ASPECT = 75.5 / 177
 export function Spec() {
   return (
     <section id="spec" aria-labelledby="spec-title" className="relative h-[150svh]">
-      <div className="sticky top-0 flex h-svh items-center">
+      <div data-spec-sticky className="sticky top-0 flex h-svh items-center">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-8 px-5 md:grid-cols-[1fr_auto_1fr] md:px-8">
           <div className="order-2 rounded-3xl bg-white/85 p-6 backdrop-blur md:order-1 md:bg-transparent md:p-0 md:backdrop-blur-none">
             <h2 id="spec-title" className="text-[28px] font-bold tracking-[-0.02em] md:text-[40px]">{SPEC.title}</h2>

@@ -1,4 +1,4 @@
-import { coverRect, deviceScreenRect, screenRectToWorld } from '../src/lib/photoFit'
+import { coverRect, photoFocus, deviceScreenRect, screenRectToWorld } from '../src/lib/photoFit'
 import { SPACES } from '../src/content/spaces'
 
 test('coverRect: 16:9 사진을 세로 화면에 깔면 좌우가 잘린다', () => {
@@ -25,7 +25,8 @@ test('deviceScreenRect: 사진과 같은 비율이면 박스 그대로', () => {
 
 test('deviceScreenRect: 세로 모바일에서도 사진 크롭을 따라간다', () => {
   const s = SPACES.find(s => s.id === 'office')!
-  const r = coverRect(s.w, s.h, 390, 844)
+  const f = photoFocus(s, 390, 844)
+  const r = coverRect(s.w, s.h, 390, 844, f.x, f.y)
   const d = deviceScreenRect(s, 390, 844)
   expect(d.cx).toBeCloseTo(r.x + ((s.device.x0 + s.device.x1) / 2) * r.w)
   expect(d.cy).toBeCloseTo(r.y + ((s.device.y0 + s.device.y1) / 2) * r.h)
@@ -56,4 +57,29 @@ test('SPACES: 5개, 순서와 박스 범위', () => {
     expect(s.device.x0).toBeGreaterThanOrEqual(0)
     expect(s.device.y1).toBeLessThanOrEqual(1)
   })
+})
+
+test('coverRect: object-position 비율을 따른다', () => {
+  const r = coverRect(1600, 893, 390, 844, 0.75, 0.5)
+  expect(r.x).toBeCloseTo((390 - r.w) * 0.75)
+})
+
+test('모든 공간의 기기가 세로 모바일·울트라와이드 화면 안에 다 들어온다', () => {
+  for (const [vw, vh] of [[390, 844], [360, 740], [2560, 1080], [1440, 900]]) {
+    SPACES.forEach(s => {
+      const f = photoFocus(s, vw, vh)
+      const r = coverRect(s.w, s.h, vw, vh, f.x, f.y)
+      expect(r.x + s.device.x0 * r.w).toBeGreaterThanOrEqual(0)
+      expect(r.x + s.device.x1 * r.w).toBeLessThanOrEqual(vw)
+      expect(r.y + s.device.y0 * r.h).toBeGreaterThanOrEqual(0)
+      expect(r.y + s.device.y1 * r.h).toBeLessThanOrEqual(vh)
+    })
+  }
+})
+
+test('photoFocus: 크롭 여유가 있으면 기기를 화면 가운데로', () => {
+  const s = SPACES.find(s => s.id === 'office')!
+  const f = photoFocus(s, 390, 844)
+  const r = coverRect(s.w, s.h, 390, 844, f.x, f.y)
+  expect(r.x + ((s.device.x0 + s.device.x1) / 2) * r.w).toBeCloseTo(195)
 })

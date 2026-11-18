@@ -14,3 +14,11 @@ export function spaceOpacities(p: number, n: number): { photo: number[]; model: 
   const photo = Array.from({ length: n }, (_, k) => (k === i ? v : 0))
   return { photo, model: 1 - v }
 }
+
+/** Without the 3D model: each photo holds its segment, neighbours crossfade over the last 10%. */
+export function photoOnlyOpacities(p: number, n: number): number[] {
+  const t = clamp01(p) * n
+  const i = Math.min(n - 1, Math.floor(t))
+  const f = i < n - 1 ? ramp(t - i, 0.9, 1) : 0
+  return Array.from({ length: n }, (_, k) => (k === i ? 1 - f : k === i + 1 ? f : 0))
+}
