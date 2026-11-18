@@ -4,6 +4,8 @@ import { ContactShadows, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { rig } from './rig'
 import { BAKED_CUP_CLIP, MODEL_HEIGHT } from './anchors'
+import { Cup } from './Cup'
+import { DisplayTracker } from './DisplayTracker'
 
 export const MODEL_URL = '/models/dispenser.glb'
 
@@ -77,6 +79,8 @@ export function Dispenser() {
   return (
     <group ref={group}>
       <primitive object={model} />
+      <Cup />
+      <DisplayTracker />
       <group ref={shadow}>
         <ContactShadows position={[0, 0.002, 0]} opacity={0.5} scale={2.4} blur={2.2} far={1.2} resolution={512} />
       </group>

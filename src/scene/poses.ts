@@ -58,7 +58,7 @@ export function displayPose(vw: number, vh: number, fill: number, sx: number, sy
 export function pourPose(vw: number, vh: number): Pose {
   const wide = vw / vh > 1
   const mid: Vec3 = [NOZZLE[0], 1.15, NOZZLE[2]]
-  return lookAt({ x: 0, y: 0, scale: 1, rotY: -0.25, sway: 0 }, mid, wide ? 1.55 : 2.2, wide ? 0.45 : 0, wide ? 0 : -0.15)
+  return lookAt({ x: 0, y: 0, scale: 1, rotY: -0.25, sway: 0 }, mid, wide ? 1.55 : 2.2, wide ? 0.45 : 0, wide ? 0 : 0.12)
 }
 
 export function buildStops(l: Layout): Stop[] {

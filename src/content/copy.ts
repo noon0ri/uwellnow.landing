@@ -45,6 +45,7 @@ export const EXPERIENCE_COPY = {
   stepFunction: '지금 필요한 건?',
   stepFlavor: '어떤 맛으로?',
   pouring: '만드는 중…',
+  done: '완성! 나만의 한 잔',
   back: '뒤로',
   retry: '다시 고르기',
   ingredientsLabel: '들어간 원료',

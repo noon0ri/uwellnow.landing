@@ -18,3 +18,5 @@
 
 html { scroll-behavior: auto; }
 body { @apply bg-white text-ink font-sans antialiased; word-break: keep-all; }
+
+@keyframes pour-bar { from { width: 0% } to { width: 100% } }
