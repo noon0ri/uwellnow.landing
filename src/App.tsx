@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, type ReactNode } from 'react'
 import { HERO } from './content/copy'
 import { hasWebGL } from './lib/webgl'
 import { Header } from './sections/Header'
@@ -11,7 +11,10 @@ import { Apps } from './sections/Apps'
 import { FinalCta } from './sections/FinalCta'
 import { Footer } from './sections/Footer'
 
-const Stage = lazy(() => import('./scene/Stage'))
+// A failed chunk (flaky network, stale deploy) falls back to the poster instead of blanking the page.
+const Stage = lazy(() =>
+  import('./scene/Stage').catch(() => ({ default: ({ fallback }: { fallback: ReactNode }) => <>{fallback}</> })),
+)
 
 function Poster() {
   return (

@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { EXPERIENCE_COPY as C } from '../content/copy'
 import { FLAVORS, FUNCTIONS, findFlavor, findFunction, resultTitle } from '../content/experience'
 import { track } from '../lib/analytics'
-import { dispatch, useExp } from '../lib/experienceStore'
+import { dispatch, dispatchTap, useExp } from '../lib/experienceStore'
 import { rig } from '../scene/rig'
 import { CtaLink } from './Header'
 
@@ -13,9 +13,11 @@ export const POUR_MS = 3000
 function usePour() {
   const s = useExp()
   useEffect(() => {
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     if (s.step === 'pouring') {
       rig.pour.color = findFlavor(s.flavor!)!.color
-      const tweens = [
+      if (reduced) gsap.set(rig.pour, { progress: 1 }), gsap.set(rig.exp, { blend: 1 })
+      const tweens = reduced ? [] : [
         gsap.fromTo(rig.pour, { progress: 0 }, { progress: 1, duration: POUR_MS / 1000 - 0.35, ease: 'power1.inOut', delay: 0.35 }),
         gsap.to(rig.exp, { blend: 1, duration: 0.8, ease: 'power2.inOut' }),
       ]
@@ -26,16 +28,29 @@ function usePour() {
       return () => { clearTimeout(t); tweens.forEach(tw => tw.kill()) }
     }
     if (s.step === 'function') {
-      gsap.to(rig.exp, { blend: 0, duration: 0.8, ease: 'power2.inOut' })
-      gsap.to(rig.pour, { progress: 0, duration: 0.4 })
+      gsap.to(rig.exp, { blend: 0, duration: reduced ? 0 : 0.8, ease: 'power2.inOut' })
+      gsap.to(rig.pour, { progress: 0, duration: reduced ? 0 : 0.4 })
     }
   }, [s.step, s.fn, s.flavor])
   return s
 }
 
 /** The dispenser screen. With 3D, DisplayTracker positions this element over the model's display every frame. */
+/** Moves focus to `el` when the step changes, if focus was in the panel or lost with an unmounted button. */
+function useStepFocus(step: string, el: React.RefObject<HTMLElement | null>, skip = false) {
+  const prev = useRef(step)
+  useEffect(() => {
+    if (prev.current === step) return
+    prev.current = step
+    const a = document.activeElement
+    if (!skip && (a === document.body || a?.closest('[data-display-panel]'))) el.current?.focus({ preventScroll: true })
+  }, [step, el, skip])
+}
+
 function Panel() {
   const s = useExp()
+  const head = useRef<HTMLParagraphElement>(null)
+  useStepFocus(s.step, head, s.step === 'done') // done: the result card takes focus
   const fn = s.fn ? findFunction(s.fn) : undefined
   const flavor = s.flavor ? findFlavor(s.flavor) : undefined
   const btn = 'flex min-h-11 items-center justify-center gap-[0.5em] rounded-[0.9em] bg-white/10 px-[0.6em] py-[0.7em] text-[max(13px,4.6cqw)] font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-white'
@@ -48,10 +63,10 @@ function Panel() {
       <img src="/img/logo.svg" alt="" className="h-[3cqw] min-h-[9px] w-auto self-start invert" />
       {s.step === 'function' && (
         <>
-          <p className="mt-[10%] text-[max(16px,7.5cqw)] font-bold leading-tight">{C.stepFunction}</p>
+          <p ref={head} tabIndex={-1} className="mt-[10%] text-[max(16px,7.5cqw)] font-bold leading-tight outline-none">{C.stepFunction}</p>
           <div className="mt-auto grid grid-cols-2 gap-[3cqw]">
             {FUNCTIONS.map(f => (
-              <button key={f.id} data-fn={f.id} className={btn} onClick={() => dispatch({ type: 'pickFunction', id: f.id })}>{f.name}</button>
+              <button key={f.id} data-fn={f.id} className={btn} onClick={() => dispatchTap({ type: 'pickFunction', id: f.id })}>{f.name}</button>
             ))}
           </div>
         </>
@@ -59,22 +74,22 @@ function Panel() {
       {s.step === 'flavor' && (
         <>
           <p className="mt-[10%] text-[max(12px,4.2cqw)] text-white/60">{fn?.name}</p>
-          <p className="mt-[1%] text-[max(16px,7.5cqw)] font-bold leading-tight">{C.stepFlavor}</p>
+          <p ref={head} tabIndex={-1} className="mt-[1%] text-[max(16px,7.5cqw)] font-bold leading-tight outline-none">{C.stepFlavor}</p>
           <div className="mt-auto grid grid-cols-2 gap-[3cqw]">
             {FLAVORS.map(f => (
-              <button key={f.id} className={btn} onClick={() => dispatch({ type: 'pickFlavor', id: f.id })}>
+              <button key={f.id} className={btn} onClick={() => dispatchTap({ type: 'pickFlavor', id: f.id })}>
                 <span aria-hidden className="h-[0.8em] w-[0.8em] rounded-full" style={{ background: f.color }} />
                 {f.name}
               </button>
             ))}
-            <button className={`${btn} bg-transparent text-white/70`} onClick={() => dispatch({ type: 'back' })}>{C.back}</button>
+            <button className={`${btn} bg-transparent text-white/70`} onClick={() => dispatchTap({ type: 'back' })}>{C.back}</button>
           </div>
         </>
       )}
       {(s.step === 'pouring' || s.step === 'done') && (
         <div className="mt-auto">
           <p className="text-[max(12px,4.2cqw)] text-white/60">{s.step === 'pouring' ? C.pouring : C.done}</p>
-          <p className="mt-[1%] text-[max(16px,7.5cqw)] font-bold leading-tight">{fn?.name} × {flavor?.name}</p>
+          <p ref={head} tabIndex={-1} className="mt-[1%] text-[max(16px,7.5cqw)] font-bold leading-tight outline-none">{fn?.name} × {flavor?.name}</p>
           <div className="mt-[6%] h-[1.2cqw] min-h-1 overflow-hidden rounded-full bg-white/15">
             <div
               className="h-full rounded-full"
@@ -89,11 +104,16 @@ function Panel() {
 
 function Result() {
   const s = useExp()
+  const head = useRef<HTMLParagraphElement>(null)
+  useEffect(() => {
+    const a = document.activeElement
+    if (s.step === 'done' && (a === document.body || a?.closest('[data-display-panel]'))) head.current?.focus({ preventScroll: true })
+  }, [s.step])
   if (s.step !== 'done') return null
   return (
     <div className="pointer-events-auto rounded-3xl bg-white p-6 shadow-xl md:p-8">
       <p className="text-sm font-semibold text-gray-800">{C.done}</p>
-      <p className="mt-2 text-[24px] font-bold tracking-[-0.02em] md:text-[32px]">{resultTitle(s.fn!, s.flavor!)}</p>
+      <p ref={head} tabIndex={-1} className="mt-2 text-[24px] font-bold tracking-[-0.02em] outline-none md:text-[32px]">{resultTitle(s.fn!, s.flavor!)}</p>
       <p className="mt-4 text-sm text-gray-800">{C.ingredientsLabel}</p>
       <ul className="mt-1 flex flex-wrap gap-2">
         {findFunction(s.fn!)!.ingredients.map(i => <li key={i} className="rounded-full bg-subtle px-3 py-1 text-sm font-semibold">{i}</li>)}

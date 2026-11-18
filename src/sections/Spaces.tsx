@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { SPACES_COPY } from '../content/copy'
 import { SPACES } from '../content/spaces'
 import { photoFocus } from '../lib/photoFit'
+import { viewport } from '../lib/viewport'
 import { photoOnlyOpacities } from '../lib/spacePhase'
 import { rig } from '../scene/rig'
 
@@ -13,7 +14,8 @@ export function Spaces() {
   useEffect(() => {
     const focus = () =>
       section.current?.querySelectorAll<HTMLImageElement>('[data-space-photo] img').forEach((img, i) => {
-        const f = photoFocus(SPACES[i], innerWidth, innerHeight)
+        const { w, h } = viewport()
+        const f = photoFocus(SPACES[i], w, h)
         img.style.objectPosition = `${f.x * 100}% ${f.y * 100}%`
       })
     focus()

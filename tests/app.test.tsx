@@ -19,3 +19,9 @@ test('헤더 내비는 기존 페이지로 간다', () => {
   screen.getAllByRole('link', { name: '원료소개' }).forEach(a => expect(a).toHaveAttribute('href', '/ingredients'))
   screen.getAllByRole('link', { name: '고객지원' }).forEach(a => expect(a).toHaveAttribute('href', '/support'))
 })
+
+test('제품소개 링크(/#product)의 대상이 있다', () => {
+  vi.spyOn(webgl, 'hasWebGL').mockReturnValue(false)
+  const { container } = render(<App />)
+  expect(container.querySelector('#product')).not.toBeNull()
+})

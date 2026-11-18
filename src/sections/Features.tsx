@@ -3,6 +3,7 @@ import { FEATURES } from '../content/copy'
 export function Features() {
   return (
     <section id="features" aria-label="주요 기능">
+      <span id="product" className="block scroll-mt-16" />
       {FEATURES.map((f, i) => (
         <div key={f.eyebrow} data-feature={i} className="flex h-svh items-end pb-[10vh] md:items-center md:pb-0">
           <div className="mx-auto w-full max-w-7xl px-5 md:px-8">

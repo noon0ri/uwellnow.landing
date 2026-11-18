@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { spaceOpacities } from '../lib/spacePhase'
 import { buildStops, lerpPose, poseAt, pourPose, type Layout, type Stop } from './poses'
 import { rig } from './rig'
+import { viewport } from '../lib/viewport'
 
 const smooth = (t: number) => t * t * (3 - 2 * t)
 const step = (t: number) => (t < 0.5 ? 0 : 1)
@@ -13,9 +14,10 @@ function measure(): Layout | null {
   const spaces = q('#spaces'), spacesSticky = q('[data-spaces-sticky]'), spec = q('#spec'), specSticky = q('[data-spec-sticky]'), exp = q('#experience')
   if (!spaces || !spacesSticky || !spec || !specSticky || !exp) return null
   const spacesTop = absTop(spaces), specTop = absTop(spec)
+  const { w, h } = viewport()
   return {
-    vw: innerWidth,
-    vh: innerHeight,
+    vw: w,
+    vh: h,
     features: [...document.querySelectorAll('[data-feature]')].map(absTop),
     spaces: { top: spacesTop, stickyStart: spacesTop, stickyEnd: spacesTop + spaces.offsetHeight - spacesSticky.offsetHeight },
     spec: { top: specTop, holdEnd: specTop + spec.offsetHeight - specSticky.offsetHeight },
@@ -39,12 +41,15 @@ export function useScrollRig() {
       st.reduced = mq.matches
     }
     update()
+    // body size misses viewport-only changes (iOS toolbar, sections sized in svh), so also listen to resize
     const ro = new ResizeObserver(update)
     ro.observe(document.body)
+    addEventListener('resize', update)
     mq.addEventListener('change', update)
     rig.ready = true
     return () => {
       ro.disconnect()
+      removeEventListener('resize', update)
       mq.removeEventListener('change', update)
       rig.ready = false
     }
